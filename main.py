@@ -24,8 +24,8 @@ DB_FILE = os.getenv("DB_FILE", "leads.db")               # e.g., /data/leads.db 
 
 SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USERNAME = os.getenv("SMTP_USERNAME", "int.edu.visa@gmail.com")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "zsxr jrjn hois necd")  # use Gmail App Password in prod
+SMTP_USERNAME = os.getenv("SMTP_USERNAME")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD") # use Gmail App Password in prod
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")  # set to your live domain after deploy
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
