@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Nika SOP Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <header class="bg-white shadow py-4 px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+    {% if is_logged_in and credits_left is not none %}
+  <span class="ml-4 px-2 py-1 rounded text-xs font-bold
+    {% if credits_left == 0 %} bg-red-100 text-red-700
+    {% else %} bg-indigo-50 text-indigo-700 {% endif %}">
+    Credits left: <b>{{ credits_left }}</b> / {{ FREE_SOP_LIMIT }}
+  </span>
+{% endif %}
+
+    <div class="text-xl font-bold text-indigo-700">Nika SOP Assistant</div>
+    <div class="flex items-center flex-wrap gap-2 mt-2 md:mt-0">
+      {% if is_logged_in %}
+        <span class="text-gray-700 text-sm">Logged in as <b>{{ user_email }}</b></span>
+        <span class="px-2 py-1 rounded text-xs font-bold
+          {% if credits_left == 0 %} bg-red-100 text-red-700
+          {% else %} bg-indigo-50 text-indigo-700 {% endif %}">
+          Credits left: <b>{{ credits_left }}</b> / {{ FREE_SOP_LIMIT }}
+        </span>
+        <a href="/upgrade"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-xs transition font-semibold
+            {% if credits_left == 0 %} animate-pulse {% endif %}">
+          {% if credits_left == 0 %} Upgrade {% else %} Top Up {% endif %}
+        </a>
+        <a href="/my-sops" class="bg-gray-100 text-indigo-700 px-3 py-1 rounded text-xs hover:bg-gray-200 font-semibold">My SOPs</a>
+        <a href="/logout" class="bg-red-100 text-red-700 px-3 py-1 rounded text-xs hover:bg-red-200 font-semibold">Logout</a>
+      {% else %}
+        <a href="/login" class="bg-indigo-600 text-white px-3 py-1 rounded text-xs hover:bg-indigo-700 font-semibold">Login</a>
+        <a href="/register" class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 font-semibold">Register</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="flex flex-col items-center justify-center min-h-[70vh] px-4">
+    {% if message %}
+      <div class="mt-8 mb-4 px-6 py-3 rounded bg-green-100 text-green-800 font-semibold text-center shadow max-w-lg">{{ message }}</div>
+    {% endif %}
+
+    <div class="max-w-2xl bg-white shadow-xl rounded-xl p-10 mt-16">
+      <h1 class="text-3xl font-bold text-indigo-700 mb-4">Write your best Statement of Purpose — instantly.</h1>
+      <p class="text-gray-700 mb-6 text-lg">
+        Nika SOP Assistant creates custom, human-like SOPs for your university or scholarship applications. Upload your CV, fill out the form, and receive a high-quality, personalized SOP in seconds.
+      </p>
+      <ul class="mb-8 space-y-1 text-gray-600 text-base list-disc pl-4">
+        <li>Choose your desired tone and style</li>
+        <li>Get a preview instantly — full access after login</li>
+        <li>Download or email your SOP (for registered users)</li>
+      </ul>
+      <!-- Corrected Start Now button: -->
+      <a href="/generate-sop"
+        class="block w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-lg py-3 px-8 rounded-lg shadow transition text-center"
+      >
+        Start Now
+      </a>
+    </div>
+  </main>
+
+  <footer class="mt-16 py-8 text-center text-gray-400 text-sm">
+    &copy; {{ 2025 }} Nika SOP Assistant. All rights reserved.
+  </footer>
+</body>
+</html>

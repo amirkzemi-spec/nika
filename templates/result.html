@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Your Statement of Purpose | Nika SOP Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center px-4 py-10">
+  <div class="max-w-2xl w-full bg-white shadow-xl rounded-xl p-8">
+    <h1 class="text-2xl font-bold text-indigo-700 mb-6">Your Statement of Purpose</h1>
+
+    {% if message %}
+      <div class="mb-4 px-4 py-2 rounded bg-yellow-100 text-yellow-800 font-semibold text-center shadow">{{ message }}</div>
+      {% if is_logged_in and not sop_text %}
+        <div class="mb-4 text-center">
+          <a href="/upgrade"
+             class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg transition">
+            Upgrade Now
+          </a>
+          <p class="text-gray-500 text-xs mt-2">Or contact us for more info!</p>
+        </div>
+      {% endif %}
+    {% elif sop_text %}
+      {% if is_logged_in %}
+        <!-- Full SOP for logged-in users -->
+        <div class="bg-gray-100 rounded-md p-5 mb-6 whitespace-pre-line text-gray-800 font-serif text-lg leading-relaxed">{{ sop_text }}</div>
+        <!-- Download/Email buttons as before -->
+      {% else %}
+        <!-- Preview for guests -->
+        {% set preview_len = (sop_text|length * 80) // 100 %}
+        <div class="bg-gray-100 rounded-md p-5 mb-4 whitespace-pre-line text-gray-800 font-serif text-lg leading-relaxed">
+          {{ sop_text[:preview_len] }}<span class="text-gray-400 font-bold">... [Register or log in to unlock the full SOP]</span>
+        </div>
+        <div class="my-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+          <div class="text-yellow-800 font-semibold mb-2">You are viewing a preview only.</div>
+          <div>
+            <a href="/register" class="underline text-indigo-500 font-semibold">Register</a> or 
+            <a href="/login" class="underline text-indigo-500 font-semibold">log in</a> to see, download, or email your full SOP.
+          </div>
+        </div>
+      {% endif %}
+    {% else %}
+      <!-- Only show this fallback if NO message and NO sop_text -->
+      <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded text-red-800">
+        No SOP generated yet. Please return to the <a href="/" class="underline text-indigo-500">main page</a>.
+      </div>
+    {% endif %}
+
+    <div class="mt-8 flex justify-end">
+      <a href="/" class="text-sm text-indigo-700 hover:underline">← Back to Home</a>
+    </div>
+  </div>
+</body>
+</html>

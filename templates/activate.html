@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Account Activation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            max-width: 500px;
+            margin: 3rem auto;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .message {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        a.button {
+            display: inline-block;
+            background-color: #007BFF;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a.button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Account Activation</h1>
+        <p class="message">{{ message }}</p>
+        <a href="/login" class="button">Go to Login</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Leads – Nika SOP Assistant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+  <div class="bg-white shadow-xl rounded-3xl p-10 max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-indigo-700 mb-6">Leads Dashboard</h1>
+    <a href="/leads.csv" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg mb-4 inline-block">⬇️ Export as CSV</a>
+    <table class="min-w-full table-auto border border-gray-300 mt-6">
+  <thead>
+    <tr class="bg-indigo-50">
+      <th class="px-4 py-2 border">#</th>
+      <th class="px-4 py-2 border">Name</th>
+      <th class="px-4 py-2 border">Email</th>
+      <th class="px-4 py-2 border">Submitted</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for lead in leads %}
+    <tr>
+      <td class="px-4 py-2 border text-gray-500">{{ loop.index }}</td>
+      <td class="px-4 py-2 border">{{ lead[0] }}</td>
+      <td class="px-4 py-2 border font-mono">{{ lead[1] }}</td>
+      <td class="px-4 py-2 border text-xs">{{ lead[2] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+    <p class="mt-4 text-gray-700 text-sm">Total leads: <b>{{ leads|length }}</b></p>
+  </div>
+</body>
+</html>
