@@ -1,18 +1,13 @@
 import os
 import sqlite3
-from urllib.parse import urljoin
-
-from dotenv import load_dotenv
-load_dotenv()
 import hashlib
 import uuid
-import openai
 import smtplib
-from dotenv import load_dotenv
-load_dotenv()
-
 from email.message import EmailMessage
 from io import BytesIO
+
+from dotenv import load_dotenv
+load_dotenv()  # loads .env locally; on Railway it reads service variables
 
 import docx
 from fastapi import FastAPI, Request, Form, Response, status, UploadFile, File, Query
@@ -20,22 +15,23 @@ from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 
 # --- Env-first config (production safe) ---
-FREE_SOP_LIMIT = int(os.getenv("FREE_SOP_LIMIT", "3"))   # default now 3
-DB_FILE = os.getenv("DB_FILE", "leads.db")               # e.g., /data/leads.db when using a mounted disk
+FREE_SOP_LIMIT = int(os.getenv("FREE_SOP_LIMIT", "3"))     # e.g., 3 free SOPs
+DB_FILE = os.getenv("DB_FILE", "leads.db")                 # set to "/data/leads.db" if using a Railway Volume
 
 SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USERNAME = os.getenv("SMTP_USERNAME")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD") # use Gmail App Password in prod
+SMTP_USERNAME = os.getenv("SMTP_USERNAME", "int.edu.visa@gmail.com")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")             # set in Railway Variables
 
-BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")  # set to your live domain after deploy
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-# ------------------------------------------
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")  # set to your live Railway URL in prod
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")           # set in Railway Variables
+# ---------------------------------------------------------
+
+# (Do NOT call send_email_with_activation_link here; it runs inside register_user)
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 templates.env.globals["FREE_SOP_LIMIT"] = FREE_SOP_LIMIT
-
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
@@ -156,48 +152,25 @@ def send_email_with_activation_link(to_email: str, activation_link: str):
         print(f"Failed to send activation email: {e}")
 
 
-from urllib.parse import urljoin
-
-BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
-
 def register_user(email: str, password: str):
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        c = conn.cursor()
-
-        # already registered?
-        c.execute("SELECT id FROM users WHERE email = ?", (email,))
-        if c.fetchone():
-            return (False, "Email already registered.")
-
-        hashed_pw = hash_password(password)
-        activation_token = str(uuid.uuid4())
-
-        c.execute(
-            "INSERT INTO users (email, hashed_password, is_active, activation_token) VALUES (?, ?, 0, ?)",
-            (email, hashed_pw, activation_token)
-        )
-        conn.commit()
-
-        # Build a clean activation URL (avoid double slashes)
-        activation_link = urljoin(BASE_URL.rstrip("/") + "/", f"activate?token={activation_token}")
-
-        try:
-            send_email_with_activation_link(email, activation_link)
-        except Exception as e:
-            print(f"Activation email failed for {email}: {e}")
-
-        return (True, "Registration successful! Please check your email to activate your account.")
-    except Exception as e:
-        print(f"register_user error: {e}")
-        return (False, "Unexpected server error. Please try again.")
-    finally:
-        try:
-            conn.close()
-        except Exception:
-            pass
-
-
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE email = ?", (email,))
+    if c.fetchone():
+        conn.close()
+        return False, "Email already registered."
+    hashed_pw = hash_password(password)
+    activation_token = str(uuid.uuid4())
+    c.execute(
+        "INSERT INTO users (email, hashed_password, is_active, activation_token) VALUES (?, ?, 0, ?)",
+        (email, hashed_pw, activation_token)
+    )
+    conn.commit()
+    conn.close()
+# Use BASE_URL so emails work after deploy
+    activation_link = f"{BASE_URL}/activate?token={activation_token}"
+    send_email_with_activation_link(email, activation_link)
+    return True, "Registration successful! Please check your email to activate your account."
 
 
 
@@ -262,6 +235,7 @@ def register_form(request: Request):
         "message": "",
         "success": True
     })
+
 
 @app.post("/register", response_class=HTMLResponse)
 async def register_submit(request: Request, email: str = Form(...), password: str = Form(...)):

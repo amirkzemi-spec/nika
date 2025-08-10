@@ -12,11 +12,17 @@
         {{ message }}
       </div>
     {% endif %}
-    <form method="post" class="space-y-6">
-      <input type="email" name="email" required placeholder="Email" class="block w-full rounded-lg border border-gray-300 p-3 mb-2" />
-      <input type="password" name="password" required placeholder="Password" class="block w-full rounded-lg border border-gray-300 p-3 mb-2" />
-      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition duration-300">Register</button>
-    </form>
+    <form method="post" action="/register" class="space-y-6">
+  <input type="email" name="email" required placeholder="Email"
+    class="block w-full rounded-lg border border-gray-300 p-3 mb-2" />
+  <input type="password" name="password" required placeholder="Password"
+    class="block w-full rounded-lg border border-gray-300 p-3 mb-2" />
+  <button type="submit"
+    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition duration-300">
+    Register
+  </button>
+</form>
+
     <div class="text-center mt-4">
       <a href="/login" class="text-indigo-600 underline">Already have an account? Login</a>
     </div>
