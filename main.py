@@ -265,7 +265,6 @@ def home(request: Request, message: str = "", success: bool = True):
         "success": success,
     })
 
-
 @app.get("/register", response_class=HTMLResponse)
 def register_form(request: Request):
     return templates.TemplateResponse("register.html", {
@@ -273,6 +272,16 @@ def register_form(request: Request):
         "message": "",
         "success": True
     })
+
+# --- New policy pages ---
+@app.get("/terms", response_class=HTMLResponse)
+def terms(request: Request):
+    return templates.TemplateResponse("terms.html", {"request": request})
+
+@app.get("/privacy", response_class=HTMLResponse)
+def privacy(request: Request):
+    return templates.TemplateResponse("privacy.html", {"request": request})
+# ------------------------
 
 @app.post("/register", response_class=HTMLResponse)
 async def register_submit(
@@ -298,6 +307,12 @@ async def register_submit(
         c.execute("UPDATE users SET tos_accepted_at = CURRENT_TIMESTAMP WHERE email = ?", (email,))
         conn.commit()
         conn.close()
+
+    return templates.TemplateResponse("register.html", {
+        "request": request,
+        "message": msg,
+        "success": ok
+    })
 
     return templates.TemplateResponse("register.html", {
         "request": request,
