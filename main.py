@@ -237,6 +237,17 @@ def register_form(request: Request):
         "success": True
     })
 
+@app.get("/clear-users")
+def clear_users():
+    import sqlite3
+    conn = sqlite3.connect("leads.db")
+    c = conn.cursor()
+    c.execute("DELETE FROM users")
+    c.execute("DELETE FROM user_sops")
+    c.execute("DELETE FROM leads")
+    conn.commit()
+    conn.close()
+    return {"status": "All users, SOPs, and leads deleted"}
 
 @app.post("/register", response_class=HTMLResponse)
 async def register_submit(request: Request, email: str = Form(...), password: str = Form(...)):
