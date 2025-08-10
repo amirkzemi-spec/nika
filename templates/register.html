@@ -2,30 +2,152 @@
 <html>
 <head>
   <title>Register</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 flex items-center justify-center min-h-screen">
   <div class="bg-white shadow-lg rounded-3xl p-10 max-w-md w-full">
-    <h2 class="text-2xl font-extrabold text-indigo-700 mb-6 text-center">Register</h2>
+    <h2 class="text-2xl font-extrabold text-indigo-700 mb-6 text-center">Create your account</h2>
+
     {% if message %}
       <div class="mb-6 p-4 rounded {{ 'bg-green-100 text-green-800' if success else 'bg-red-100 text-red-800' }}">
         {{ message }}
       </div>
     {% endif %}
-    <form method="post" action="/register" class="space-y-6">
-  <input type="email" name="email" required placeholder="Email"
-    class="block w-full rounded-lg border border-gray-300 p-3 mb-2" />
-  <input type="password" name="password" required placeholder="Password"
-    class="block w-full rounded-lg border border-gray-300 p-3 mb-2" />
-  <button type="submit"
-    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition duration-300">
-    Register
-  </button>
-</form>
 
-    <div class="text-center mt-4">
+    <form method="post" class="space-y-4" id="registerForm" novalidate>
+      <input
+        type="email"
+        name="email"
+        required
+        placeholder="Email"
+        class="block w-full rounded-lg border border-gray-300 p-3"
+      />
+
+      <!-- Password -->
+      <div>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          placeholder="Password"
+          class="block w-full rounded-lg border border-gray-300 p-3"
+          aria-describedby="pwHelp"
+        />
+        <p id="pwHelp" class="mt-2 text-xs text-gray-500">
+          Must be at least 8 characters and include 1 uppercase, 1 number, and 1 special character.
+        </p>
+        <div id="pwErrors" class="mt-2 text-sm text-red-600 hidden"></div>
+      </div>
+
+      <!-- Confirm Password -->
+      <div>
+        <input
+          type="password"
+          id="confirm_password"
+          name="confirm_password_client_only"
+          required
+          placeholder="Confirm Password"
+          class="block w-full rounded-lg border border-gray-300 p-3"
+        />
+        <div id="cpwError" class="mt-2 text-sm text-red-600 hidden"></div>
+      </div>
+
+      <!-- TOS / Privacy -->
+      <div class="flex items-start gap-2">
+        <input id="agree" name="agree" type="checkbox" required class="h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+        <label for="agree" class="text-sm text-gray-700">
+          I agree to the
+          <a href="/terms" class="text-indigo-600 underline">Terms of Service</a>
+          and
+          <a href="/privacy" class="text-indigo-600 underline">Privacy Policy</a>.
+        </label>
+      </div>
+
+      <button
+        id="submitBtn"
+        type="submit"
+        class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition duration-300"
+        disabled
+      >
+        Register
+      </button>
+    </form>
+
+    <div class="text-center mt-4 space-y-2">
       <a href="/login" class="text-indigo-600 underline">Already have an account? Login</a>
+      <!-- Optional: add this once you build the flow -->
+      <!-- <div><a href="/forgot-password" class="text-gray-600 underline text-sm">Forgot your password?</a></div> -->
     </div>
   </div>
+
+  <script>
+    const form = document.getElementById('registerForm');
+    const pw = document.getElementById('password');
+    const cpw = document.getElementById('confirm_password');
+    const pwErrors = document.getElementById('pwErrors');
+    const cpwError = document.getElementById('cpwError');
+    const agree = document.getElementById('agree');
+    const submitBtn = document.getElementById('submitBtn');
+
+    const rules = {
+      length: /.{8,}/,
+      upper: /[A-Z]/,
+      number: /[0-9]/,
+      special: /[!@#$%^&*()[\]{}\-_+=;:'",.<>/?\\|`~]/
+    };
+
+    function validatePassword() {
+      const val = pw.value || '';
+      const errors = [];
+      if (!rules.length.test(val)) errors.push('• At least 8 characters');
+      if (!rules.upper.test(val)) errors.push('• At least one uppercase letter');
+      if (!rules.number.test(val)) errors.push('• At least one number');
+      if (!rules.special.test(val)) errors.push('• At least one special character');
+
+      if (errors.length) {
+        pwErrors.classList.remove('hidden');
+        pwErrors.textContent = 'Password needs: ' + errors.join(', ');
+        return false;
+      } else {
+        pwErrors.classList.add('hidden');
+        pwErrors.textContent = '';
+        return true;
+      }
+    }
+
+    function validateConfirm() {
+      if (!cpw.value) {
+        cpwError.classList.add('hidden');
+        cpwError.textContent = '';
+        return false;
+      }
+      if (pw.value !== cpw.value) {
+        cpwError.classList.remove('hidden');
+        cpwError.textContent = 'Passwords do not match.';
+        return false;
+      } else {
+        cpwError.classList.add('hidden');
+        cpwError.textContent = '';
+        return true;
+      }
+    }
+
+    function updateSubmitState() {
+      const ok = validatePassword() && validateConfirm() && agree.checked && form.email.checkValidity();
+      submitBtn.disabled = !ok;
+    }
+
+    pw.addEventListener('input', () => { validatePassword(); validateConfirm(); updateSubmitState(); });
+    cpw.addEventListener('input', () => { validateConfirm(); updateSubmitState(); });
+    agree.addEventListener('change', updateSubmitState);
+    form.email.addEventListener('input', updateSubmitState);
+
+    // Final guard before submit (client-side)
+    form.addEventListener('submit', (e) => {
+      if (submitBtn.disabled) e.preventDefault();
+    });
+  </script>
 </body>
 </html>

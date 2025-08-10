@@ -40,6 +40,7 @@ templates.env.globals["FREE_SOP_LIMIT"] = FREE_SOP_LIMIT
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
+
     c.execute("""
         CREATE TABLE IF NOT EXISTS user_sops (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,6 +49,7 @@ def init_db():
             created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
     c.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,6 +60,13 @@ def init_db():
             created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
+    # ✅ Add new column for TOS acceptance if it doesn't exist
+    c.execute("PRAGMA table_info(users)")
+    columns = [col[1] for col in c.fetchall()]
+    if "tos_accepted_at" not in columns:
+        c.execute("ALTER TABLE users ADD COLUMN tos_accepted_at TIMESTAMP")
+
     c.execute("""
         CREATE TABLE IF NOT EXISTS leads (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,8 +75,10 @@ def init_db():
             created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
     conn.commit()
     conn.close()
+
 
 
 init_db()
@@ -264,8 +275,30 @@ def register_form(request: Request):
     })
 
 @app.post("/register", response_class=HTMLResponse)
-async def register_submit(request: Request, email: str = Form(...), password: str = Form(...)):
+async def register_submit(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    agree: str = Form(None)
+):
+    # Require agreement to Terms and Privacy Policy
+    if not agree:
+        return templates.TemplateResponse("register.html", {
+            "request": request,
+            "message": "You must agree to the Terms of Service and Privacy Policy.",
+            "success": False
+        })
+
     ok, msg = register_user(email, password)
+
+    # Save acceptance timestamp if registration successful
+    if ok:
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        c.execute("UPDATE users SET tos_accepted_at = CURRENT_TIMESTAMP WHERE email = ?", (email,))
+        conn.commit()
+        conn.close()
+
     return templates.TemplateResponse("register.html", {
         "request": request,
         "message": msg,
